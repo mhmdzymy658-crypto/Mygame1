@@ -775,6 +775,60 @@ VIEWS.online=function(){return backBar('رقابت با دوستان','play')+`<
 (function init(){try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){storageOK=false}
 ensureDaily();checkBadges();save();render();
 if(!S.seen)openModal(`<h3>خوش آمدی</h3><div class="shopi"><em>🎯</em><div><b>مرحله‌ها</b><small>هر مرحله ۵ سؤال دارد و هیچ سؤالی تکراری نیست؛ حداقل ۶۰٪ درست یعنی عبور.</small></div></div><div class="shopi"><em>💡</em><div><b>کمکی‌ها</b><small>سرنخ، حذف گزینه و آشکارسازی تصویر؛ هر کدام کمی از امتیاز می‌کاهند.</small></div></div><div class="shopi"><em>🔥</em><div><b>کومبو</b><small>پاسخ‌های درست پشت‌سرهم امتیاز بیشتری می‌دهند.</small></div></div><div class="shopi"><em>🃏</em><div><b>کارت‌ها</b><small>با سکه بسته بخر و برای هر کارت عکس بازیکن بگذار.</small></div></div><button class="cta" data-a="seen">شروع</button>`)})();
+</script><div id="chat-box" style="position:fixed; bottom:10px; right:10px; width:250px; height:300px; background:#fff; border:2px solid #333; border-radius:10px; display:flex; flex-direction:column; z-index:9999; direction:rtl; font-family:sans-serif;">
+  <div style="background:#333; color:#fff; padding:8px; border-radius:8px 8px 0 0; text-align:center; font-weight:bold;">💬 چت بازی</div>
+  <div id="chat-messages" style="flex:1; overflow-y:auto; padding:8px; font-size:13px;"></div>
+  <div style="display:flex; border-top:1px solid #ccc; padding:5px;">
+    <input id="chat-input" type="text" placeholder="پیام بنویس..." style="flex:1; border:none; outline:none; padding:5px; font-size:13px;">
+    <button onclick="sendChatMessage()" style="background:#4CAF50; color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">ارسال</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBGCA1TACcJP3xwehZgfvbwxDGAoOp3SV0",
+    authDomain: "ygame-chat.firebaseapp.com",
+    databaseURL: "https://ygame-chat-default-rtdb.firebaseio.com",
+    projectId: "ygame-chat",
+    storageBucket: "ygame-chat.firebasestorage.app",
+    messagingSenderId: "937594714051",
+    appId: "1:937594714051:web:03e206914ef795e9d6af76"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const chatRef = ref(db, 'chat');
+
+  const playerName = "بازیکن" + Math.floor(Math.random() * 1000);
+
+  window.sendChatMessage = function() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (text === '') return;
+    push(chatRef, {
+      user: playerName,
+      text: text,
+      time: Date.now()
+    });
+    input.value = '';
+  };
+
+  document.getElementById('chat-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') sendChatMessage();
+  });
+
+  onChildAdded(chatRef, (snapshot) => {
+    const data = snapshot.val();
+    const messagesDiv = document.getElementById('chat-messages');
+    const msg = document.createElement('div');
+    msg.style.marginBottom = '5px';
+    msg.innerHTML = '<b style="color:#0066cc;">' + data.user + ':</b> ' + data.text;
+    messagesDiv.appendChild(msg);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
 </script>
 </body>
 </html>
